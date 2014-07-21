@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012 Alexey Aksenov ezh@ezh.msk.ru
+// Copyright (c) 2012-2014 Alexey Aksenov ezh@ezh.msk.ru
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,9 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import sbt.application.ApplicationKeys._
+import sbt.application.Keys._
 
-sbt.application.Plugin.activate
+sbt.application.ApplicationWithPackager
 
 name := "HelloWorldEclipseJavaFXStageCoach"
 
@@ -25,6 +25,10 @@ organization := "org.digimead"
 
 version <<= (baseDirectory) { (b) => scala.io.Source.fromFile(b / "version").mkString.trim }
 
+crossScalaVersions := Seq("2.11.1")
+
+scalaVersion := "2.11.1"
+
 scalacOptions ++= Seq("-encoding", "UTF-8", "-deprecation", "-unchecked", "-Xcheckinit")
 
 javacOptions ++= Seq("-Xlint:unchecked", "-Xlint:deprecation")
@@ -33,4 +37,8 @@ mainClass := Some("org.digimead.stagecoach.ui.UI")
 
 //logLevel := Level.Debug
 
-javafxEnabled in appConf := true
+javafxEnabled in ApplicationConf := true
+
+proguardEnabled in ApplicationConf := true
+
+//proguardOption in ApplicationConf <++= (baseDirectory) map { (b) => scala.io.Source.fromFile(b / "proguard.cfg").mkString :: Nil }

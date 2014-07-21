@@ -1,7 +1,7 @@
 /**
  * sbt-application - application builder with ProGuard and JavaFX support
  *
- * Copyright (c) 2012 Alexey Aksenov ezh@ezh.msk.ru
+ * Copyright (c) 2012-2014 Alexey Aksenov ezh@ezh.msk.ru
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,15 +42,15 @@ object JavaFX {
       javafxRT
     case (false, javafxRT) ⇒ Seq()
   })
-  /** generate JavaFX artifact name*/
+  /** Generate JavaFX artifact name. */
   def javafxArtifactTask = (javafxSuffix, sbt.Keys.`package` in Compile) map {
     (javafxSuffix, originalArtifact) ⇒
       val name = originalArtifact.getName.split("""\.""")
       new File(originalArtifact.getParent, name.dropRight(1).mkString(".") +
         Seq(javafxSuffix, name.last).mkString("."))
   }
-  /** try to generate classpath for JavaFX at default location */
-  def javafxRTTask: Project.Initialize[Task[Classpath]] = (streams) map {
+  /** Generate classpath with jfxrt.jar. */
+  def javafxRTTask = (streams) map {
     (streams) ⇒
       val home = new File(System.getProperty("java.home"))
       val result = if (!home.exists()) {
@@ -62,12 +62,20 @@ object JavaFX {
           streams.log.warn("Java library path not exists")
           None
         } else {
-          val javafxPath = new File(lib, "jfxrt.jar")
-          if (!javafxPath.exists()) {
-            streams.log.warn("jfxrt.jar at '%s' not found".format(javafxPath))
-            None
-          } else
-            Some(Seq(javafxPath).classpath)
+          val javafxPath =
+            if (JavaVersion.isJava8Compatible())
+              Some(new File(new File(lib, "ext"), "jfxrt.jar"))
+            else if (JavaVersion.isJava7Compatible())
+              Some(new File(lib, "jfxrt.jar"))
+            else
+              None // Not supported
+          javafxPath.flatMap { javafxPath ⇒
+            if (!javafxPath.exists()) {
+              streams.log.warn("jfxrt.jar at '%s' not found".format(javafxPath))
+              None
+            } else
+              Some(Seq(javafxPath).classpath)
+          }
         }
       }
       result getOrElse {
@@ -75,15 +83,15 @@ object JavaFX {
         (home.getParentFile() ** "jfxrt.jar").classpath
       }
   }
-  /** */
-  def javafxAntTask: Project.Initialize[Task[Classpath]] = (streams) map {
+  /** Generate classpath with ant-javafx.jar. */
+  def javafxAntTask = (streams) map {
     (streams) ⇒
       val home = new File(System.getProperty("java.home"))
       val result = if (!home.exists()) {
         streams.log.warn("Java home not exists")
         None
       } else {
-        val lib = new File(home, "lib")
+        val lib = new File(home.getParentFile(), "lib")
         if (!lib.exists()) {
           streams.log.warn("Java library path not exists")
           None
@@ -101,7 +109,7 @@ object JavaFX {
         (home.getParentFile() ** "ant-javafx.jar").classpath
       }
   }
-  def javafxTask(): Project.Initialize[Task[Option[File]]] = (javafxAnt, javafxArtifact, javefxArtifactType,
+  def javafxTask() = (javafxAnt, javafxArtifact, javefxArtifactType,
     mainClass, sbt.Keys.`package` in Compile, proguard, streams) map {
       (javafxAnt, javafxArtifact, javefxArtifactType, mainClass, originalArtifact, proguard, streams) ⇒
         if (javafxAnt.isEmpty)
@@ -126,7 +134,7 @@ object JavaFX {
                 application.setMainClass(mainClass.getOrElse { sys.error("mainClass undefined") })
                 task.execute()
             }
-            Some(javafxArtifact)
+            Option(javafxArtifact)
           case FXDeploy ⇒
             throw new UnsupportedOperationException
         }

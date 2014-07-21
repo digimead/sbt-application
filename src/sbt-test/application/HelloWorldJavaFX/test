@@ -1,0 +1,3 @@
+-$ exists target/deps/
+> clean
+> application:package

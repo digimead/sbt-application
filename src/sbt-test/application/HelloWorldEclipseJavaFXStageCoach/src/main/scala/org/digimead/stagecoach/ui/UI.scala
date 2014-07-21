@@ -2,7 +2,7 @@
  * StageCoach example from JavaFX Pro 2
  * by James Weaver, Weiqi Gao, Stephen Chin, Dean Iverson, Johan Vos
  *
- * Copyright (c) 2012 Alexey Aksenov ezh@ezh.msk.ru
+ * Copyright (c) 2012-2014 Alexey Aksenov ezh@ezh.msk.ru
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,37 +21,18 @@ package org.digimead.stagecoach.ui
 
 import javafx.application.Application
 import javafx.beans.property.SimpleStringProperty
-import javafx.beans.value.ChangeListener
-import javafx.beans.value.ObservableValue
-import javafx.event.ActionEvent
-import javafx.event.EventHandler
+import javafx.beans.value.{ ChangeListener, ObservableValue }
+import javafx.event.{ ActionEvent, EventHandler }
 import javafx.geometry.VPos
-import javafx.scene.GroupBuilder
-import javafx.scene.SceneBuilder
-import javafx.scene.control.ButtonBuilder
-import javafx.scene.control.CheckBoxBuilder
-import javafx.scene.control.Label
-import javafx.scene.control.TextFieldBuilder
+import javafx.scene.{ Group, GroupBuilder, Scene, SceneBuilder }
+import javafx.scene.control.{ Button, ButtonBuilder, CheckBox, CheckBoxBuilder, Label, TextField, TextFieldBuilder }
 import javafx.scene.input.MouseEvent
-import javafx.scene.layout.HBoxBuilder
-import javafx.scene.layout.VBoxBuilder
+import javafx.scene.layout.{ HBox, HBoxBuilder, VBox, VBoxBuilder }
 import javafx.scene.paint.Color
-import javafx.scene.shape.RectangleBuilder
-import javafx.scene.text.TextBuilder
-import javafx.stage.Screen
-import javafx.stage.Stage
-import javafx.stage.StageStyle
-import javafx.stage.WindowEvent
+import javafx.scene.shape.{ Rectangle, RectangleBuilder }
+import javafx.scene.text.{ Text, TextBuilder }
+import javafx.stage.{ Screen, Stage, StageStyle, WindowEvent }
 import javafx.util.Builder
-import javafx.scene.text.Text
-import javafx.scene.control.CheckBox
-import javafx.scene.control.TextField
-import javafx.scene.Scene
-import javafx.scene.Group
-import javafx.scene.shape.Rectangle
-import javafx.scene.layout.VBox
-import javafx.scene.layout.HBox
-import javafx.scene.control.Button
 
 /**
  * Main class of StageCoach
@@ -62,37 +43,37 @@ class UI extends Application {
   var dragAnchorX: Double = 0
   var dragAnchorY: Double = 0
   val title = new SimpleStringProperty()
-  lazy val textStageX = <>[TextBuilder[_], Text](TextBuilder.create()) { b =>
+  lazy val textStageX = <>[TextBuilder[_], Text](TextBuilder.create()) { b ⇒
     b.textOrigin(VPos.TOP)
     b.build()
   }
-  lazy val textStageY = <>[TextBuilder[_], Text](TextBuilder.create()) { b =>
+  lazy val textStageY = <>[TextBuilder[_], Text](TextBuilder.create()) { b ⇒
     b.textOrigin(VPos.TOP)
     b.build()
   }
-  lazy val textStageW = <>[TextBuilder[_], Text](TextBuilder.create()) { b =>
+  lazy val textStageW = <>[TextBuilder[_], Text](TextBuilder.create()) { b ⇒
     b.textOrigin(VPos.TOP)
     b.build()
   }
-  lazy val textStageH = <>[TextBuilder[_], Text](TextBuilder.create()) { b =>
+  lazy val textStageH = <>[TextBuilder[_], Text](TextBuilder.create()) { b ⇒
     b.textOrigin(VPos.TOP)
     b.build()
   }
-  lazy val textStageF = <>[TextBuilder[_], Text](TextBuilder.create()) { b =>
+  lazy val textStageF = <>[TextBuilder[_], Text](TextBuilder.create()) { b ⇒
     b.textOrigin(VPos.TOP)
     b.build()
   }
-  lazy val checkBoxResizable = <>[CheckBoxBuilder[_], CheckBox](CheckBoxBuilder.create()) { b =>
+  lazy val checkBoxResizable = <>[CheckBoxBuilder[_], CheckBox](CheckBoxBuilder.create()) { b ⇒
     b.text("resizable")
     b.disable(stageStyle == StageStyle.TRANSPARENT ||
       stageStyle == StageStyle.UNDECORATED)
     b.build()
   }
-  lazy val checkBoxFullScreen = <>[CheckBoxBuilder[_], CheckBox](CheckBoxBuilder.create()) { b =>
+  lazy val checkBoxFullScreen = <>[CheckBoxBuilder[_], CheckBox](CheckBoxBuilder.create()) { b ⇒
     b.text("fullScreen")
     b.build()
   }
-  lazy val titleTextField = <>[TextFieldBuilder[_], TextField](TextFieldBuilder.create()) { b =>
+  lazy val titleTextField = <>[TextFieldBuilder[_], TextField](TextFieldBuilder.create()) { b ⇒
     b.text("Stage Coach")
     b.prefColumnCount(15)
     b.build()
@@ -110,13 +91,13 @@ class UI extends Application {
       }
     }
 
-    val scene = <>[SceneBuilder[_], Scene](SceneBuilder.create()) { b =>
+    val scene = <>[SceneBuilder[_], Scene](SceneBuilder.create()) { b ⇒
       b.width(270)
       b.height(370)
       b.fill(Color.TRANSPARENT)
-      b.root(<>[GroupBuilder[_], Group](GroupBuilder.create()) { b =>
+      b.root(<>[GroupBuilder[_], Group](GroupBuilder.create()) { b ⇒
         b.children(
-          <>[RectangleBuilder[_], Rectangle](RectangleBuilder.create()) { b =>
+          <>[RectangleBuilder[_], Rectangle](RectangleBuilder.create()) { b ⇒
             b.width(250)
             b.height(350)
             b.arcWidth(50)
@@ -124,7 +105,7 @@ class UI extends Application {
             b.fill(Color.SKYBLUE)
             b.build()
           },
-          <>[VBoxBuilder[_], VBox](VBoxBuilder.create) { b =>
+          <>[VBoxBuilder[_], VBox](VBoxBuilder.create) { b ⇒
             b.layoutX(30)
             b.layoutY(20)
             b.spacing(10)
@@ -136,26 +117,26 @@ class UI extends Application {
               textStageF,
               checkBoxResizable,
               checkBoxFullScreen,
-              <>[HBoxBuilder[_], HBox](HBoxBuilder.create()) { b =>
+              <>[HBoxBuilder[_], HBox](HBoxBuilder.create()) { b ⇒
                 b.spacing(10)
                 b.children(new Label("title:"), titleTextField)
                 b.build()
               },
-              <>[ButtonBuilder[_], Button](ButtonBuilder.create()) { b =>
+              <>[ButtonBuilder[_], Button](ButtonBuilder.create()) { b ⇒
                 b.text("toBack()")
                 b.onAction(new EventHandler[ActionEvent]() {
                   override def handle(e: ActionEvent) = stage.toBack()
                 })
                 b.build()
               },
-              <>[ButtonBuilder[_], Button](ButtonBuilder.create()) { b =>
+              <>[ButtonBuilder[_], Button](ButtonBuilder.create()) { b ⇒
                 b.text("toFront()")
                 b.onAction(new EventHandler[ActionEvent]() {
                   override def handle(e: ActionEvent) = stage.toFront()
                 })
                 b.build()
               },
-              <>[ButtonBuilder[_], Button](ButtonBuilder.create()) { b =>
+              <>[ButtonBuilder[_], Button](ButtonBuilder.create()) { b ⇒
                 b.text("close()")
                 b.onAction(new EventHandler[ActionEvent]() {
                   override def handle(e: ActionEvent) = stage.close()
@@ -216,7 +197,7 @@ class UI extends Application {
    * little wrapper that negate effect of Java <B extends T<B>>
    * and prevents to crush Scala compiler
    */
-  def <>[T, S](b: Builder[_])(f: T => S)(implicit m: Manifest[T]) = f(b.asInstanceOf[T])
+  def <>[T, S](b: Builder[_])(f: T ⇒ S) = f(b.asInstanceOf[T])
 }
 
 object UI extends App {

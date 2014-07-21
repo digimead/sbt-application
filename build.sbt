@@ -1,14 +1,47 @@
-sbtPlugin := true
+//
+// Copyright (c) 2012-2014 Alexey Aksenov ezh@ezh.msk.ru
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+ScriptedPlugin.scriptedSettings
 
 name := "sbt-application"
 
-organization := "sbt.application"
+description := "Application builder with ProGuard and JavaFX support."
 
-version := "0.1-SNAPSHOT"
+licenses := Seq("The Apache Software License, Version 2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 
-scalacOptions ++= Seq("-unchecked", "-deprecation", "-Xcheckinit", "-Xfatal-warnings")
+organization := "org.digimead"
+
+organizationHomepage := Some(url("http://digimead.org"))
+
+homepage := Some(url("https://github.com/sbt-android-mill/sbt-application"))
+
+version <<= (baseDirectory) { (b) => scala.io.Source.fromFile(b / "version").mkString.trim }
+
+// There is no "-Xfatal-warnings" because we have cross compilation against different Scala versions
+scalacOptions ++= Seq("-encoding", "UTF-8", "-unchecked", "-deprecation", "-Xcheckinit")
+
+// http://vanillajava.blogspot.ru/2012/02/using-java-7-to-target-much-older-jvms.html
+javacOptions ++= Seq("-Xlint:unchecked", "-Xlint:deprecation", "-source", "1.7", "-target", "1.7")
+
+if (sys.env.contains("XBOOTCLASSPATH")) Seq(javacOptions += "-Xbootclasspath:" + sys.env("XBOOTCLASSPATH")) else Seq()
+
+sbtPlugin := true
+
+scriptedBufferLog := false
 
 libraryDependencies ++= Seq(
-  "org.apache.ant" % "ant" % "1.8.4",
-  "net.sf.proguard" % "proguard-base" % "4.8"
+  "org.apache.ant" % "ant" % "1.9.4",
+  "net.sf.proguard" % "proguard-base" % "4.11"
 )

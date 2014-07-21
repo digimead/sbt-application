@@ -21,7 +21,7 @@ package sbt.application.proguard
 import java.io.File
 import java.util.Properties
 
-import proguard.{ Configuration => ProGuardConfiguration }
+import proguard.{ Configuration ⇒ ProGuardConfiguration }
 import proguard.ConfigurationParser
 import proguard.ProGuard
 
@@ -32,20 +32,21 @@ import sbt.application.Keys._
 
 object Proguard {
   /** ProGuard plugin settings */
-  val settings: Seq[Project.Setting[_]] = Seq(
+  val settings = Seq(
     proguard <<= proguardTask,
     proguardArtifact <<= proguardArtifactTask,
     proguardEnabled := true,
     proguardInJars <<= proguardInJarsTask,
     proguardLibraryJars <<= proguardLibraryJarsTask,
+    proguardJavaRT <<= proguardJavaRTTask,
     proguardOptimizations := Seq.empty,
     proguardOption <<= proguardOptionTask,
     proguardSuffix := "-proguard")
 
   /** ProGuard task */
-  def proguardTask: Project.Initialize[Task[Option[File]]] =
-    (proguardEnabled, proguardArtifact, sbt.Keys.`package` in Compile, proguardOptimizations, proguardInJars, proguardLibraryJars, proguardOption, streams) map {
-      (proguardEnabled, proguardArtifact, originalArtifact, proguardOptimizations, proguardInJars, proguardLibraryJars, proguardOption, streams) =>
+  def proguardTask =
+    (proguardEnabled, proguardArtifact, sbt.Keys.`package` in Compile, proguardOptimizations, proguardInJars, proguardJavaRT, proguardLibraryJars, proguardOption, streams) map {
+      (proguardEnabled, proguardArtifact, originalArtifact, proguardOptimizations, proguardInJars, proguardJavaRT, proguardLibraryJars, proguardOption, streams) ⇒
         if (proguardEnabled) {
           val optimizationOptions = if (proguardOptimizations.isEmpty) Seq("-dontoptimize") else proguardOptimizations
           val sep = File.pathSeparator
@@ -54,11 +55,11 @@ object Proguard {
             proguardInJars.map("\"" + _ + "\"" + skipResources.mkString("(", ",!**/", ")"))).mkString(sep)
           val outJarsArg = "-outjars " + "\"" + proguardArtifact.absolutePath + "\""
           val libraryJarsArg = proguardLibraryJars.map("\"" + _ + "\"") match {
-            case Nil => ""
-            case libraryJars => "-libraryjars " + libraryJars.mkString(sep)
+            case Nil ⇒ ""
+            case libraryJars ⇒ "-libraryjars " + libraryJars.mkString(sep)
           }
           val args = Seq(inJarsArg, outJarsArg, libraryJarsArg) ++ optimizationOptions ++ proguardOption
-          streams.log.debug("executing proguard: " + (for (i <- 0 until args.size) yield { "arg" + (i + 1) + ": " + args(i) }).mkString("\n"))
+          streams.log.debug("executing proguard: " + (for (i ← 0 until args.size) yield { "arg" + (i + 1) + ": " + args(i) }).mkString("\n"))
           val config = new ProGuardConfiguration
           new ConfigurationParser(args.toArray[String], new Properties).parse(config)
           streams.log.debug("executing proguard: " + args.mkString("\n"))
@@ -70,18 +71,19 @@ object Proguard {
         }
     }
   def proguardInJarsTask = (proguardLibraryJars, dependencyClasspath in Compile) map {
-    (proguardLibraryJars, dependencyClasspath) =>
+    (proguardLibraryJars, dependencyClasspath) ⇒
       dependencyClasspath.map(_.data) --- proguardLibraryJars get
   }
-  def proguardLibraryJarsTask = (javafxRT) map ((javafxRT) => javafxRT.map(_.data))
+  def proguardLibraryJarsTask = (javafxRT, javafxAnt, proguardJavaRT) map ((javafxRT, javafxAnt, proguardJavaRT) ⇒
+    javafxRT.map(_.data) ++ javafxAnt.map(_.data) ++ proguardJavaRT.map(_.data))
   def proguardArtifactTask = (proguardSuffix, sbt.Keys.`package` in Compile) map {
-    (proguardSuffix, originalArtifact) =>
+    (proguardSuffix, originalArtifact) ⇒
       val name = originalArtifact.getName.split("""\.""")
       new File(originalArtifact.getParent, name.dropRight(1).mkString(".") +
         Seq(proguardSuffix, name.last).mkString("."))
   }
   def proguardOptionTask = (applicationPackage) map {
-    case Some(applicationPackage) =>
+    case Some(applicationPackage) ⇒
       Seq(
         "-dontwarn",
         "-dontobfuscate",
@@ -98,8 +100,33 @@ object Proguard {
         java.lang.Object readResolve();
       }
     """)
-    case None =>
+    case None ⇒
       sys.error("please, define 'application-package'")
       Seq()
+  }
+  def proguardJavaRTTask = (streams) map {
+    (streams) ⇒
+      val home = new File(System.getProperty("java.home"))
+      val result = if (!home.exists()) {
+        streams.log.warn("Java home not exists")
+        None
+      } else {
+        val lib = new File(home, "lib")
+        if (!lib.exists()) {
+          streams.log.warn("Java library path not exists")
+          None
+        } else {
+          val artifactPath = new File(lib, "rt.jar")
+          if (!artifactPath.exists()) {
+            streams.log.warn("rt.jar at '%s' not found".format(artifactPath))
+            None
+          } else
+            Some(Seq(artifactPath).classpath)
+        }
+      }
+      result getOrElse {
+        streams.log.warn("Try to find rt.jar at " + home)
+        (home.getParentFile() ** "rt.jar").classpath
+      }
   }
 }

@@ -41,8 +41,8 @@ object Plugin extends sbt.Plugin {
     applicationLibraries := Seq(),
     sbt.Keys.`package` <<= packageTask)
 
-  def defaultSettings: Seq[Project.Setting[_]] = inConfig(ApplicationConf)(pluginSettings ++ Proguard.settings ++ JavaFX.settings) ++ JavaFX.dependencySettings
-  def defaultSettingsWithPackager: Seq[Project.Setting[_]] = inConfig(ApplicationConf)(pluginSettingsWithPackager ++ Proguard.settings ++ JavaFX.settings) ++ JavaFX.dependencySettings
+  def defaultSettings = inConfig(ApplicationConf)(pluginSettings ++ Proguard.settings ++ JavaFX.settings) ++ JavaFX.dependencySettings
+  def defaultSettingsWithPackager = inConfig(ApplicationConf)(pluginSettingsWithPackager ++ Proguard.settings ++ JavaFX.settings) ++ JavaFX.dependencySettings
   /** main task */
   def packageTask = (sbt.Keys.`package` in Compile, Keys.proguard, Keys.javafx, applicationLibraries) map {
     (originalArtifact, proguard, javafx, applicationLibraries) ⇒
