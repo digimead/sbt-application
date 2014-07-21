@@ -1,4 +1,4 @@
-sbt-application
+sbt-application [![Build Status](https://travis-ci.org/digimead/sbt-application.png?branch=master)](https://travis-ci.org/digimead/sbt-application)
 ===============
 
 sbt-application - application builder with ProGuard and JavaFX support
@@ -40,4 +40,4 @@ included in the LICENSE file.
 Copyright
 ---------
 
-Copyright © 2012 Alexey B. Aksenov/Ezh. All rights reserved.
+Copyright © 2012-2014 Alexey B. Aksenov/Ezh. All rights reserved.
