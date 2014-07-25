@@ -109,7 +109,7 @@ object JavaFX {
       }
   }
   def javafxTask() = (javafxEnabled, javafxAnt, javafxArtifact, javefxArtifactType,
-    mainClass, sbt.Keys.`package` in Compile, proguard, streams) map {
+    mainClass in (Compile, packageBin), sbt.Keys.`package` in Compile, proguard, streams) map {
       (javafxEnabled, javafxAnt, javafxArtifact, javefxArtifactType, mainClass, originalArtifact, proguard, streams) ⇒
         if (javafxAnt.isEmpty)
           sys.error("Path to ant-javafx.jar not defined.")
