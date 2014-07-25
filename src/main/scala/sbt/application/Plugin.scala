@@ -25,28 +25,21 @@ import sbt.Keys._
 import sbt._
 
 /**
- * sbt-application plugin entry
+ * sbt-application plugin entry.
  */
 object Plugin extends sbt.Plugin {
-  /** Default plugin settings */
+  /** Default plugin settings. */
   val pluginSettings = Seq(
-    applicationPackage := None,
-    applicationSuffix := "",
-    applicationLibraries := Seq(),
-    mainClass := None)
-  /** Default plugin settings with packager. */
-  val pluginSettingsWithPackager = Seq(
-    applicationPackage <<= (mainClass) map { _.map(_.split("""\.""").dropRight(1).mkString(".")) },
+    applicationPackage <<= (mainClass in (Compile, packageBin)) map { _.map(_.split("""\.""").dropRight(1).mkString(".")) },
     applicationSuffix := "-app",
-    applicationLibraries := Seq(),
-    sbt.Keys.`package` <<= packageTask)
+    applicationLibraries := Seq())
 
-  def defaultSettings = inConfig(ApplicationConf)(pluginSettings ++ Proguard.settings ++ JavaFX.settings) ++ JavaFX.dependencySettings
-  def defaultSettingsWithPackager = inConfig(ApplicationConf)(pluginSettingsWithPackager ++ Proguard.settings ++ JavaFX.settings) ++ JavaFX.dependencySettings
-  /** main task */
-  def packageTask = (sbt.Keys.`package` in Compile, Keys.proguard, Keys.javafx, applicationLibraries) map {
-    (originalArtifact, proguard, javafx, applicationLibraries) ⇒
-      val source = proguard getOrElse originalArtifact
-      source
-  }
+  def defaultSettings = inConfig(ApplicationConf)(pluginSettings ++ Proguard.settings ++ JavaFX.settings) ++
+    JavaFX.dependencySettings ++ Seq(sbt.Keys.`package` <<= packageTask)
+  /** Package task. */
+  def packageTask = (sbt.Keys.`package` in Compile, Keys.proguard in ApplicationConf,
+    Keys.javafx in ApplicationConf, applicationLibraries in ApplicationConf) map {
+      (originalArtifact, proguard, javafx, applicationLibraries) ⇒
+        javafx orElse proguard getOrElse originalArtifact
+    }
 }

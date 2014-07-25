@@ -43,11 +43,12 @@ object Proguard {
     proguardOption <<= proguardOptionTask,
     proguardSuffix := "-proguard")
 
-  /** ProGuard task */
+  /** ProGuard task. */
   def proguardTask =
     (proguardEnabled, proguardArtifact, sbt.Keys.`package` in Compile, proguardOptimizations, proguardInJars, proguardJavaRT, proguardLibraryJars, proguardOption, streams) map {
       (proguardEnabled, proguardArtifact, originalArtifact, proguardOptimizations, proguardInJars, proguardJavaRT, proguardLibraryJars, proguardOption, streams) ⇒
         if (proguardEnabled) {
+          streams.log.info("Create Proguard artifact")
           val optimizationOptions = if (proguardOptimizations.isEmpty) Seq("-dontoptimize") else proguardOptimizations
           val sep = File.pathSeparator
           val skipResources = List("!META-INF/MANIFEST.MF", "library.properties")
@@ -59,20 +60,19 @@ object Proguard {
             case libraryJars ⇒ "-libraryjars " + libraryJars.mkString(sep)
           }
           val args = Seq(inJarsArg, outJarsArg, libraryJarsArg) ++ optimizationOptions ++ proguardOption
-          streams.log.debug("executing proguard: " + (for (i ← 0 until args.size) yield { "arg" + (i + 1) + ": " + args(i) }).mkString("\n"))
           val config = new ProGuardConfiguration
           new ConfigurationParser(args.toArray[String], new Properties).parse(config)
           streams.log.debug("executing proguard: " + args.mkString("\n"))
           new ProGuard(config).execute
           Some(proguardArtifact)
         } else {
-          streams.log.debug("skip proguard")
+          streams.log.debug("Skip Proguard")
           None
         }
     }
   def proguardInJarsTask = (proguardLibraryJars, dependencyClasspath in Compile) map {
     (proguardLibraryJars, dependencyClasspath) ⇒
-      dependencyClasspath.map(_.data) --- proguardLibraryJars get
+      (dependencyClasspath.map(_.data) --- proguardLibraryJars).get
   }
   def proguardLibraryJarsTask = (javafxRT, javafxAnt, proguardJavaRT) map ((javafxRT, javafxAnt, proguardJavaRT) ⇒
     javafxRT.map(_.data) ++ javafxAnt.map(_.data) ++ proguardJavaRT.map(_.data))
@@ -101,7 +101,7 @@ object Proguard {
       }
     """)
     case None ⇒
-      sys.error("please, define 'application-package'")
+      sys.error("Please, define 'application-package'")
       Seq()
   }
   def proguardJavaRTTask = (streams) map {

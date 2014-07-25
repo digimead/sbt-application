@@ -15,7 +15,7 @@
 
 import sbt.application.Keys._
 
-sbt.application.ApplicationWithPackager
+sbt.application.Application
 
 name := "HelloWorldJavaFX"
 

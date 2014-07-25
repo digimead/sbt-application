@@ -35,12 +35,11 @@ object JavaFX {
     javafxSuffix := "-jfx")
 
   /** user's project dependency container with JavaFX */
-  def dependencySettings = Seq(unmanagedJars in Compile <++= (javafxEnabled in ApplicationConf, javafxRT in ApplicationConf) map {
-    case (true, javafxRT) ⇒
+  def dependencySettings = Seq(unmanagedJars in Compile <++= (javafxRT in ApplicationConf) map {
+    case javafxRT ⇒
       if (javafxRT.isEmpty)
         sys.error("Please, provide classpath for javafx")
       javafxRT
-    case (false, javafxRT) ⇒ Seq()
   })
   /** Generate JavaFX artifact name. */
   def javafxArtifactTask = (javafxSuffix, sbt.Keys.`package` in Compile) map {
@@ -109,34 +108,41 @@ object JavaFX {
         (home.getParentFile() ** "ant-javafx.jar").classpath
       }
   }
-  def javafxTask() = (javafxAnt, javafxArtifact, javefxArtifactType,
+  def javafxTask() = (javafxEnabled, javafxAnt, javafxArtifact, javefxArtifactType,
     mainClass, sbt.Keys.`package` in Compile, proguard, streams) map {
-      (javafxAnt, javafxArtifact, javefxArtifactType, mainClass, originalArtifact, proguard, streams) ⇒
+      (javafxEnabled, javafxAnt, javafxArtifact, javefxArtifactType, mainClass, originalArtifact, proguard, streams) ⇒
         if (javafxAnt.isEmpty)
           sys.error("Path to ant-javafx.jar not defined.")
-        val classLoader = new URLClassLoader(Array(javafxAnt.head.data.toURI().toURL()), getClass().getClassLoader())
-        val antProject = new org.apache.tools.ant.Project()
-        javefxArtifactType match {
-          case FXJar ⇒
-            val task = new FXJarTask(antProject, classLoader)
-            task.setVerbose(true)
-            task.setDestfile(javafxArtifact.getAbsolutePath())
-            IO.withTemporaryDirectory {
-              dir ⇒
-                val source = proguard getOrElse originalArtifact
-                streams.log.info("Extracting " + source.getName + " to " + dir)
-                IO.unzip(source, dir)
-                // set base directory
-                val fileset = task.createFileSet
-                fileset.setDir(dir)
-                // set main class
-                val application = task.createApplication
-                application.setMainClass(mainClass.getOrElse { sys.error("mainClass undefined") })
-                task.execute()
-            }
-            Option(javafxArtifact)
-          case FXDeploy ⇒
-            throw new UnsupportedOperationException
+        if (javafxEnabled) {
+          streams.log.info("Create JavaFX artifact")
+          val classLoader = new URLClassLoader(Array(javafxAnt.head.data.toURI().toURL()), getClass().getClassLoader())
+          val antProject = new org.apache.tools.ant.Project()
+          javefxArtifactType match {
+            case FXJar ⇒
+              val task = new FXJarTask(antProject, classLoader)
+              task.setVerbose(true)
+              task.setDestfile(javafxArtifact.getAbsolutePath())
+              IO.withTemporaryDirectory {
+                dir ⇒
+                  val source = proguard getOrElse originalArtifact
+                  streams.log.debug("Extracting " + source.getName + " to " + dir)
+                  IO.unzip(source, dir)
+                  // set base directory
+                  val fileset = task.createFileSet
+                  fileset.setDir(dir)
+                  // set main class
+                  val application = task.createApplication
+                  application.setMainClass(mainClass.getOrElse { sys.error("mainClass undefined") })
+                  task.execute()
+                  IO.delete(dir)
+              }
+              Option(javafxArtifact)
+            case FXDeploy ⇒
+              throw new UnsupportedOperationException
+          }
+        } else {
+          streams.log.debug("Skip JavaFX packager")
+          None
         }
     }
 }

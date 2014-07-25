@@ -15,7 +15,7 @@
 
 import sbt.application.Keys._
 
-sbt.application.ApplicationWithPackager
+sbt.application.Application
 
 name := "HelloWorldEclipseJavaFXStageCoach"
 
@@ -35,10 +35,12 @@ javacOptions ++= Seq("-Xlint:unchecked", "-Xlint:deprecation")
 
 mainClass := Some("org.digimead.stagecoach.ui.UI")
 
-//logLevel := Level.Debug
+// logLevel := Level.Debug
 
-javafxEnabled in ApplicationConf := true
+javafxEnabled in ApplicationConf := false
 
-proguardEnabled in ApplicationConf := true
+proguardEnabled in ApplicationConf := false
 
-//proguardOption in ApplicationConf <++= (baseDirectory) map { (b) => scala.io.Source.fromFile(b / "proguard.cfg").mkString :: Nil }
+proguardOption in ApplicationConf <++= (baseDirectory) map { (b) => scala.io.Source.fromFile(b / "proguard.cfg").mkString :: Nil }
+
+artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) => artifact.name + "." + artifact.extension }

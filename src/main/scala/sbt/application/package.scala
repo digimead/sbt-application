@@ -19,10 +19,8 @@
 package sbt
 
 package object application {
-  /** Entry point for plugin in user's project */
+  /** Entry point for plugin in user's project. */
   lazy val Application = Plugin.defaultSettings
-  /** Entry point for plugin in user's project */
-  lazy val ApplicationWithPackager = Plugin.defaultSettingsWithPackager
 
   // export declarations for end user
   lazy val ApplicationKey = Keys
