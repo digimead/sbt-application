@@ -35,7 +35,7 @@ object Proguard {
   val settings = Seq(
     proguard <<= proguardTask,
     proguardArtifact <<= proguardArtifactTask,
-    proguardEnabled := true,
+    proguardEnabled := false,
     proguardInJars <<= proguardInJarsTask,
     proguardLibraryJars <<= proguardLibraryJarsTask,
     proguardJavaRT <<= proguardJavaRTTask,

@@ -30,7 +30,7 @@ object JavaFX {
     javefxArtifactType := FXJar,
     javafxAnt <<= javafxAntTask,
     javafxArtifact <<= javafxArtifactTask,
-    javafxEnabled := true,
+    javafxEnabled := false,
     javafxRT <<= javafxRTTask,
     javafxSuffix := "-jfx")
 
