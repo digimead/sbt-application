@@ -44,10 +44,10 @@ object Keys {
   val proguardArtifact = TaskKey[File]("proguard-artifact")
   val proguardEnabled = SettingKey[Boolean]("proguard-enabled")
   val proguardInJars = TaskKey[Seq[File]]("proguard-in-jars")
+  val proguardInputFilter = TaskKey[File ⇒ String]("proguard-input-filter", "Add input filter")
   val proguardJavaRT = TaskKey[Classpath]("proguard-java-rt", "Path to rt.jar, as usual JAVA_HOME/lib/rt.jar")
   val proguardLibraryJars = TaskKey[Seq[File]]("proguard-library-jars")
   val proguardOption = TaskKey[Seq[String]]("proguard-option")
-  val proguardOptimizations = SettingKey[Seq[String]]("proguard-optimizations")
   val proguardSuffix = SettingKey[String]("proguard-suffix")
 
   sealed trait JavaFXArtifactType

@@ -37,32 +37,30 @@ object Proguard {
     proguardArtifact <<= proguardArtifactTask,
     proguardEnabled := false,
     proguardInJars <<= proguardInJarsTask,
-    proguardLibraryJars <<= proguardLibraryJarsTask,
+    proguardInputFilter <<= proguardInputFilterTask,
     proguardJavaRT <<= proguardJavaRTTask,
-    proguardOptimizations := Seq.empty,
+    proguardLibraryJars <<= proguardLibraryJarsTask,
     proguardOption <<= proguardOptionTask,
     proguardSuffix := "-proguard")
 
   /** ProGuard task. */
   def proguardTask =
-    (proguardEnabled, proguardArtifact, sbt.Keys.`package` in Compile, proguardOptimizations, proguardInJars, proguardJavaRT, proguardLibraryJars, proguardOption, streams) map {
-      (proguardEnabled, proguardArtifact, originalArtifact, proguardOptimizations, proguardInJars, proguardJavaRT, proguardLibraryJars, proguardOption, streams) ⇒
+    (proguardEnabled, proguardArtifact, sbt.Keys.`package` in Compile, proguardInJars, proguardJavaRT, proguardLibraryJars, proguardInputFilter, proguardOption, streams) map {
+      (proguardEnabled, proguardArtifact, originalArtifact, proguardInJars, proguardJavaRT, proguardLibraryJars, proguardInputFilter, proguardOption, streams) ⇒
         if (proguardEnabled) {
           streams.log.info("Create Proguard artifact")
-          val optimizationOptions = if (proguardOptimizations.isEmpty) Seq("-dontoptimize") else proguardOptimizations
           val sep = File.pathSeparator
-          val skipResources = List("!META-INF/MANIFEST.MF", "library.properties")
           val inJarsArg = "-injars " + (("\"" + originalArtifact.absolutePath + "\"") +:
-            proguardInJars.map("\"" + _ + "\"" + skipResources.mkString("(", ",!**/", ")"))).mkString(sep)
+            proguardInJars.map(jar ⇒ "\"" + jar.absolutePath + "\"" + proguardInputFilter(jar))).mkString(sep)
           val outJarsArg = "-outjars " + "\"" + proguardArtifact.absolutePath + "\""
           val libraryJarsArg = proguardLibraryJars.map("\"" + _ + "\"") match {
             case Nil ⇒ ""
             case libraryJars ⇒ "-libraryjars " + libraryJars.mkString(sep)
           }
-          val args = Seq(inJarsArg, outJarsArg, libraryJarsArg) ++ optimizationOptions ++ proguardOption
+          val args = Seq(inJarsArg, outJarsArg, libraryJarsArg) ++ proguardOption
+          streams.log.debug("executing proguard: " + args.mkString("\n"))
           val config = new ProGuardConfiguration
           new ConfigurationParser(args.toArray[String], new Properties).parse(config)
-          streams.log.debug("executing proguard: " + args.mkString("\n"))
           new ProGuard(config).execute
           Some(proguardArtifact)
         } else {
@@ -128,5 +126,8 @@ object Proguard {
         streams.log.warn("Try to find rt.jar at " + home)
         (home.getParentFile() ** "rt.jar").classpath
       }
+  }
+  def proguardInputFilterTask = (streams) map { _ ⇒
+    (artefact: File) ⇒ List("!META-INF/MANIFEST.MF").mkString("(", ",", ")")
   }
 }
