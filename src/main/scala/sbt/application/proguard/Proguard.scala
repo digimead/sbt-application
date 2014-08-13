@@ -50,14 +50,11 @@ object Proguard {
         if (proguardEnabled) {
           streams.log.info("Create Proguard artifact")
           val sep = File.pathSeparator
-          val inJarsArg = "-injars " + (("\"" + originalArtifact.absolutePath + "\"") +:
-            proguardInJars.map(jar ⇒ "\"" + jar.absolutePath + "\"" + proguardInputFilter(jar))).mkString(sep)
-          val outJarsArg = "-outjars " + "\"" + proguardArtifact.absolutePath + "\""
-          val libraryJarsArg = proguardLibraryJars.map("\"" + _ + "\"") match {
-            case Nil ⇒ ""
-            case libraryJars ⇒ "-libraryjars " + libraryJars.mkString(sep)
-          }
-          val args = Seq(inJarsArg, outJarsArg, libraryJarsArg) ++ proguardOption
+          val inJarsArg = Seq("-injars " + originalArtifact.absolutePath) ++
+            proguardInJars.map(jar ⇒ "-injars " + jar.absolutePath + proguardInputFilter(jar))
+          val outJarsArg = "-outjars " + proguardArtifact.absolutePath
+          val libraryJarsArg = proguardLibraryJars.map("-libraryjars " + _)
+          val args = inJarsArg ++ Seq(outJarsArg) ++ libraryJarsArg ++ proguardOption
           streams.log.debug("executing proguard: " + args.mkString("\n"))
           val config = new ProGuardConfiguration
           new ConfigurationParser(args.toArray[String], new Properties).parse(config)
@@ -72,8 +69,8 @@ object Proguard {
     (proguardLibraryJars, dependencyClasspath) ⇒
       (dependencyClasspath.map(_.data) --- proguardLibraryJars).get
   }
-  def proguardLibraryJarsTask = (javafxRT, javafxAnt, proguardJavaRT) map ((javafxRT, javafxAnt, proguardJavaRT) ⇒
-    javafxRT.map(_.data) ++ javafxAnt.map(_.data) ++ proguardJavaRT.map(_.data))
+  def proguardLibraryJarsTask = (javafxRT, proguardJavaRT) map ((javafxRT, proguardJavaRT) ⇒
+    javafxRT.map(_.data) ++ proguardJavaRT.map(_.data))
   def proguardArtifactTask = (proguardSuffix, sbt.Keys.`package` in Compile) map {
     (proguardSuffix, originalArtifact) ⇒
       val name = originalArtifact.getName.split("""\.""")
