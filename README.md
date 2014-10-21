@@ -25,6 +25,8 @@ If you will create new origin/feature-* please open feature request for yourself
 * We will have a history for feature and ground for documentation
 * If week passed and there wasn't any activity + all tests passed = release a new version ;-)
 
+__Required Java 7 or higher__
+
 AUTHORS
 -------
 
