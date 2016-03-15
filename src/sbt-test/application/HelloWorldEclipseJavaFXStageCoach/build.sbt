@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012-2014 Alexey Aksenov ezh@ezh.msk.ru
+// Copyright (c) 2012-2016 Alexey Aksenov ezh@ezh.msk.ru
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ organization := "org.digimead"
 
 version <<= (baseDirectory) { (b) => scala.io.Source.fromFile(b / "version").mkString.trim }
 
-crossScalaVersions := Seq("2.11.2")
+crossScalaVersions := Seq("2.11.7")
 
-scalaVersion := "2.11.2"
+scalaVersion := "2.11.7"
 
 scalacOptions ++= Seq("-encoding", "UTF-8", "-deprecation", "-unchecked", "-Xcheckinit")
 

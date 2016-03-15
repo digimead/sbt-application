@@ -42,4 +42,4 @@ included in the LICENSE file.
 Copyright
 ---------
 
-Copyright © 2012-2014 Alexey B. Aksenov/Ezh. All rights reserved.
+Copyright © 2012-2016 Alexey B. Aksenov/Ezh. All rights reserved.

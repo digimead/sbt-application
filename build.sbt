@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012-2014 Alexey Aksenov ezh@ezh.msk.ru
+// Copyright (c) 2012-2016 Alexey Aksenov ezh@ezh.msk.ru
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ organization := "org.digimead"
 
 organizationHomepage := Some(url("http://digimead.org"))
 
-homepage := Some(url("https://github.com/sbt-android-mill/sbt-application"))
+homepage := Some(url("https://github.com/digimead/sbt-application"))
 
 version <<= (baseDirectory) { (b) => scala.io.Source.fromFile(b / "version").mkString.trim }
 
@@ -40,5 +40,5 @@ scriptedBufferLog := false
 
 libraryDependencies ++= Seq(
   "org.apache.ant" % "ant" % "1.9.4",
-  "net.sf.proguard" % "proguard-base" % "4.11"
+  "net.sf.proguard" % "proguard-base" % "5.2.1"
 )
